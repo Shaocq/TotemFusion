@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Nullable>disable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <AssemblyName>TotemFusion</AssemblyName>
+        <RootNamespace>TotemFusion</RootNamespace>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+        <!-- 鍙嶇紪璇戜骇鐗╄嚜甯?AssemblyInfo锛屽叧闂嚜鍔ㄧ敓鎴愰伩鍏嶅睘鎬ч噸澶?-->
+        <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+
+        <!-- ilspy 淇濈暀浜嗗彲绌哄紩鐢ㄦ爣娉紙濡?MethodInfo?锛夛紝Nullable 鍏抽棴鏃跺彧鏄竴鏉″憡璀?-->
+        <NoWarn>$(NoWarn);CS8632</NoWarn>
+
+        <!-- 娓告垙瀹夎鐩綍锛堝寘鍚?Duckov.exe锛夛紱鍙敤 -p:DuckovPath="..." 瑕嗙洊 -->
+        <DuckovPath Condition="'$(DuckovPath)' == ''">E:\Steam\steamapps\common\Escape from Duckov</DuckovPath>
+        <SubPath>\Duckov_Data\Managed\</SubPath>
+    </PropertyGroup>
+
+    <!--
+        鐣岄潰澶栬鍏ㄩ儴鍦ㄨ繍琛屾椂寮曠敤鍘熺増璧勬簮鎴栬嚜缁橈紙UiFactory / SelfDrawnButton锛夛紝
+        涓嶅啀鍐呭祵浠讳綍鍥剧墖锛屽噺灏忓寘浣撱€?    -->
+    <ItemGroup>
+        <None Remove="Panel.png" />
+        <None Remove="Rect16.png" />
+        <None Remove="RoundedRect.png" />
+        <None Remove="RoundedRectSmall.png" />
+    </ItemGroup>
+
+    <!-- 娓告垙绋嬪簭闆嗭細缂栬瘧鏈熷紩鐢紝涓嶅鍒跺埌杈撳嚭鐩綍 -->
+    <ItemGroup>
+        <Reference Include="$(DuckovPath)$(SubPath)TeamSoda.*">
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(DuckovPath)$(SubPath)ItemStatsSystem.dll">
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(DuckovPath)$(SubPath)SodaLocalization.dll">
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(DuckovPath)$(SubPath)Unity*">
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="$(DuckovPath)$(SubPath)Newtonsoft.Json.dll">
+            <Private>False</Private>
+        </Reference>
+        <!-- Item 绛夌被鍨嬪疄鐜颁簡 Odin 鐨?ISelfValidator锛岀紪璇戞湡闇€瑕佽绋嬪簭闆?-->
+        <Reference Include="$(DuckovPath)$(SubPath)Sirenix.*">
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+
+    <!--
+        Harmony 涓嶅唴宓屻€佷笉闅?mod 鍒嗗彂锛岃繍琛屾椂渚濊禆鍓嶇疆銆孒armonyLib銆嶏紙宸ュ潑 3589088839锛?        宸茬粡鎶?0Harmony.dll 杞藉叆杩涚▼銆傝繖閲屼粎浣滅紪璇戞湡寮曠敤銆?    -->
+    <ItemGroup>
+        <Reference Include="..\harmony\0Harmony.dll">
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+
+    <!-- 宸ョ▼鐩綍閲屾湁 info.ini 鏃讹紝鏋勫缓鍚庤嚜鍔ㄦ暣鐞嗘垚鍙姞杞界殑 mod 鏂囦欢澶?-->
+    <Target Name="PackModFolder" AfterTargets="Build" Condition="Exists('$(MSBuildProjectDirectory)\info.ini')">
+        <ItemGroup>
+            <ModPayload Include="$(TargetPath)" />
+            <ModPayload Include="$(MSBuildProjectDirectory)\info.ini" />
+            <ModPayload Include="$(MSBuildProjectDirectory)\preview.png"
+                        Condition="Exists('$(MSBuildProjectDirectory)\preview.png')" />
+            <!-- 鍘?mod 鐨?OnAfterSetup 浼氬湪鍚岀洰褰曟煡鎵惧苟鍔犺浇 0Harmony.dll -->
+            <ModPayload Include="$(MSBuildProjectDirectory)\..\harmony\0Harmony.dll"
+                        Condition="Exists('$(MSBuildProjectDirectory)\..\harmony\0Harmony.dll')" />
+        </ItemGroup>
+        <Copy SourceFiles="@(ModPayload)" DestinationFolder="$(OutputPath)Mod\$(AssemblyName)" SkipUnchangedFiles="false" />
+    </Target>
+
+</Project>
